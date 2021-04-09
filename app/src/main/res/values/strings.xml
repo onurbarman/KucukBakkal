@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">KucukBakkal</string>
+    <string name="check_internet_connection">Lütfen internet bağlantınızı kontrol ediniz.</string>
+</resources>
