@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.main.products.ProductsFragment">
+    tools:context=".ui.main.products.ProductsFragment"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/toolbar_color"
-        android:paddingVertical="10dp">
+        android:paddingVertical="4dp">
 
         <TextView
             android:id="@+id/textToolbarTitle"
@@ -22,7 +25,8 @@
             android:layout_height="wrap_content"
             android:text="Mini Bakkal"
             android:textColor="@color/grey"
-            android:textSize="15sp"
+            android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

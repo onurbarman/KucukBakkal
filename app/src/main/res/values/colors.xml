@@ -10,4 +10,5 @@
     <color name="blue">#E6FFFE</color>
 
     <color name="toolbar_color">#E3E4E6</color>
+    <color name="total_price_bg">#C3DAC1</color>
 </resources>

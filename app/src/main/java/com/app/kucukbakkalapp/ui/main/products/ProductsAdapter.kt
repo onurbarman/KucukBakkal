@@ -13,10 +13,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.app.kucukbakkalapp.R
 import com.app.kucukbakkalapp.data.model.products.ProductsData
-import com.app.kucukbakkalapp.utils.Constants
-import com.app.kucukbakkalapp.utils.GlideUtils
+import com.app.kucukbakkalapp.data.room.Basket
+import com.app.kucukbakkalapp.utils.*
 
-class ProductsAdapter(val context: Context, private var products: List<ProductsData>, private val onProductClick: (product: ProductsData) -> Unit )
+class ProductsAdapter(val context: Context, private var products: List<ProductsData>, private var basket: List<Basket>,
+                      private val updateFragment: UpdateFragment,
+                      private val addOrExtractInterface: AddOrExtractInterface,
+                      private val onProductClick: (product: ProductsData) -> Unit )
     : RecyclerView.Adapter<ProductsAdapter.ProductsViewHolder>() {
 
     private var mLastClickTime : Long  = System.currentTimeMillis()
@@ -35,13 +38,15 @@ class ProductsAdapter(val context: Context, private var products: List<ProductsD
         holder.bind(products[position])
     }
 
-    fun updateProducts(products: List<ProductsData>) {
+    fun updateProducts(products: List<ProductsData>, basket: List<Basket>) {
         this.products = products
+        this.basket = basket
         notifyDataSetChanged()
     }
 
     fun clearAdapter() {
         this.products = listOf()
+        this.basket = listOf()
         notifyDataSetChanged()
     }
 
@@ -65,11 +70,26 @@ class ProductsAdapter(val context: Context, private var products: List<ProductsD
                 onProductClick.invoke(product)
             }
 
+            GlideUtils.urlToImageView(context, product.imageUrl,imgProduct)
+            textProductPrice.text=product.currency+product.price
+            textProductTitle.text=product.name
+
+            for (item in basket){
+                if (item.id==product.id){
+                    constraintCount.visibility=View.VISIBLE
+                    textItemCount.text=item.amount.toString()
+                    break
+                }
+            }
+
             btnAdd.setOnClickListener {
                 val count = textItemCount.text.toString().toInt()
                 if (product.stock>count){
                     constraintCount.visibility=View.VISIBLE
                     textItemCount.text=(count+1).toString()
+                    Utils.setItemCount(context,Utils.getItemCount(context)+1)
+                    addOrExtractInterface.add(product,count+1)
+                    updateFragment.update()
                 }
             }
 
@@ -79,11 +99,12 @@ class ProductsAdapter(val context: Context, private var products: List<ProductsD
                     constraintCount.visibility=View.INVISIBLE
                 }
                 textItemCount.text=(count-1).toString()
+                Utils.setItemCount(context,Utils.getItemCount(context)-1)
+                addOrExtractInterface.extract(product,count-1)
+                updateFragment.update()
             }
 
-            GlideUtils.urlToImageView(context, product.imageUrl,imgProduct)
-            textProductPrice.text=product.currency+product.price
-            textProductTitle.text=product.name
+
 
         }
     }

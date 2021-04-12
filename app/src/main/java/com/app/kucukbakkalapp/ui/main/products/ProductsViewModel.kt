@@ -22,8 +22,25 @@ class ProductsViewModel : ViewModel() {
     fun getProducts() {
         viewModelScope.launch {
             val retrofitPost = productRepository.getProducts()
-            if (retrofitPost.data!=null)
+            if (retrofitPost.data!=null) {
                 post.postValue(retrofitPost.data)
+                Log.d("products_response",retrofitPost.data.toString())
+            }
+        }
+
+    }
+
+    val postAllBasket: MutableLiveData<List<Basket>> by lazy {
+        MutableLiveData<List<Basket>>()
+    }
+
+
+    fun getAllBasket(context: Context) {
+        viewModelScope.launch {
+            val basket : List<Basket>? =  BasketDatabase(context).getBasketDao().getAllBasket()
+            if(basket!=null){
+                postAllBasket.postValue(basket)
+            }
         }
 
     }
@@ -61,6 +78,18 @@ class ProductsViewModel : ViewModel() {
             BasketDatabase(context).getBasketDao().updateBasket(basket)
             postBasketResponse.postValue(true)
             Log.d("Basket","Basket guncellendi")
+        }
+
+    }
+
+    val postProductDelete: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    fun deleteFromBasket(context: Context,id : String) {
+        viewModelScope.launch {
+            BasketDatabase(context).getBasketDao().deleteBasketItem(id)
+            postProductDelete.postValue(true)
         }
 
     }

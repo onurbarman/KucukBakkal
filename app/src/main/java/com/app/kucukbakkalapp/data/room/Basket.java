@@ -6,9 +6,12 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import org.jetbrains.annotations.NotNull;
+
 @Entity(tableName = "Basket")
 public class Basket {
 
+    @NonNull
     @PrimaryKey
     @ColumnInfo(name = "id")
     String id;
@@ -20,7 +23,7 @@ public class Basket {
     public Basket() {
     }
 
-    public Basket(String id, @NonNull Integer mAmount) {
+    public Basket(@NotNull String id, @NonNull Integer mAmount) {
         this.id = id;
         this.amount = mAmount;
     }

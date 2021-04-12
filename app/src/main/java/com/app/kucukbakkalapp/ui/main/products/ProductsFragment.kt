@@ -7,27 +7,36 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Update
 import com.app.kucukbakkalapp.R
 import com.app.kucukbakkalapp.data.model.products.ProductsData
+import com.app.kucukbakkalapp.data.room.Basket
 import com.app.kucukbakkalapp.utils.AddOrExtractInterface
+import com.app.kucukbakkalapp.utils.UpdateFragment
 import com.app.kucukbakkalapp.utils.Utils
 import kotlinx.android.synthetic.main.fragment_products.*
 
-class ProductsFragment : Fragment(R.layout.fragment_products), AddOrExtractInterface {
+class ProductsFragment : Fragment(R.layout.fragment_products), AddOrExtractInterface, UpdateFragment {
     private val viewModel: ProductsViewModel by viewModels()
     private lateinit var productsAdapter: ProductsAdapter
+    private lateinit var basketList : MutableList<Basket>
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
         initClick()
+        getAllBasket()
+        listenAllBasketData()
         getProducts()
         listenProductsData()
     }
 
     private fun initView() {
         recyclerViewProducts.layoutManager = GridLayoutManager(requireContext(),3, RecyclerView.VERTICAL,false)
-        productsAdapter = ProductsAdapter(requireContext(), listOf()) { product -> productClick(product) }
+        productsAdapter = ProductsAdapter(requireContext(), listOf(), listOf(),this,this) { product -> productClick(product) }
+
+        setItemCountBadge()
     }
 
     private fun initClick() {
@@ -45,7 +54,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products), AddOrExtractInter
         viewModel.post.observe(requireActivity(),{
             if (it!=null){
                 if (it.isNotEmpty()){
-                    productsAdapter.updateProducts(it)
+                    productsAdapter.updateProducts(it,basketList)
                     recyclerViewProducts.adapter = productsAdapter
                 }
             }
@@ -79,15 +88,45 @@ class ProductsFragment : Fragment(R.layout.fragment_products), AddOrExtractInter
     }
 
     private fun listenCheckBasketData(product: ProductsData, count: Int){
-        viewModel.post.observe(requireActivity(), {
+        viewModel.postBasket.observe(requireActivity(), {
             if (it!=null) {
-                viewModel.updateBasket(requireContext(),product.id,count)
+                if (count==0)
+                    viewModel.deleteFromBasket(requireContext(),product.id)
+                else
+                    viewModel.updateBasket(requireContext(),product.id,count)
             }
             else{
                 viewModel.addToBasket(requireContext(),product.id,count)
             }
-
-            viewModel.post.removeObservers(requireActivity())
+            viewModel.postBasket.removeObservers(requireActivity())
         })
+    }
+
+    private fun getAllBasket() {
+        viewModel.getAllBasket(requireContext())
+    }
+
+    private fun listenAllBasketData(){
+        viewModel.postAllBasket.observe(requireActivity(), Observer {
+            if (it!=null) {
+                basketList = mutableListOf()
+                basketList.addAll(it)
+            }
+        })
+    }
+
+    private fun setItemCountBadge() {
+        val itemCount = Utils.getItemCount(requireContext())
+        if (itemCount > 0) {
+            relativeBasketItemCount.visibility = View.VISIBLE
+            textBasketCount.text = itemCount.toString()
+        }
+        else{
+            relativeBasketItemCount.visibility = View.INVISIBLE
+        }
+    }
+
+    override fun update() {
+        setItemCountBadge()
     }
 }
